@@ -1,10 +1,14 @@
 name: "direnv-nix"
 description: "Use a nix based direnv environment"
 inputs:
-    nix-cache-glob:
-        description: "file glob patterns used when calculating the nix store cache. Should include all nix files/scripts to build the env and specified as a json array string"
+    nix-cache-prefix:
+        description: "Prefix for nix store cache key"
         required: false
-        default: '["**/*.nix", "**/flake.lock"]'
+        default: "nix-store"
+    # nix-cache-files:
+    #     description: "File name patterns (used in find) for files used in the nix derivation"
+    #     required: false
+    #     default: '["*/*.nix", "*/flake.lock"]'
 # outputs:
 #     random-number:
 #         description: "Random number"
@@ -18,7 +22,8 @@ runs:
           id: nix-cache
           with:
               path: /tmp/nixcache
-              key: ${{ format('{0}-{1}', runner.os, hashFiles(join(fromJson(inputs.nix-cache-glob), ','))) }}
+              #   key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles(join(fromJson(inputs.nix-cache-glob), ','))) }}
+              key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles('**/*.nix', '**/flake.lock')) }}
 
         - uses: cachix/install-nix-action@v18
           with:
