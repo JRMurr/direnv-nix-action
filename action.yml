@@ -1,0 +1,27 @@
+name: "direnv-nix"
+description: "Use a nix based direnv enviorment"
+# inputs:
+#     cache-key:
+#         description: "key for nix store cache"
+#         required: false
+#         default: "TODO"
+# outputs:
+#     random-number:
+#         description: "Random number"
+#         value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+    using: "composite"
+    steps:
+        - uses: cachix/install-nix-action@v17
+          with:
+              nix_path: nixpkgs=channel:nixos-unstable # TODO: config option
+              # TODO: make this a config option
+              extra_nix_config: |
+                  sandbox = false
+
+        - name: "Setup Nix Environment"
+          shell: bash
+          run: |
+              nix-env --install --attr direnv nix-direnv -f '<nixpkgs>'
+              direnv allow . && eval "$(direnv export bash)"
+              echo "$PATH" >> $GITHUB_PATH
