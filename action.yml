@@ -1,10 +1,10 @@
 name: "direnv-nix"
-description: "Use a nix based direnv enviorment"
-# inputs:
-#     cache-key:
-#         description: "key for nix store cache"
-#         required: false
-#         default: "TODO"
+description: "Use a nix based direnv environment"
+inputs:
+    nix-cache-glob:
+        description: "file glob patterns used when calculating the nix store cache. Should include all nix files/scripts to build the env and specified as a json array string"
+        required: false
+        default: '["**/*.nix", "**/flake.lock"]'
 # outputs:
 #     random-number:
 #         description: "Random number"
@@ -12,6 +12,14 @@ description: "Use a nix based direnv enviorment"
 runs:
     using: "composite"
     steps:
+        # cache nix store https://github.com/cachix/install-nix-action/issues/56#issuecomment-1240991760
+        - name: "Cache Nix store"
+          uses: actions/cache@v3.0.8
+          id: nix-cache
+          with:
+              path: /tmp/nixcache
+              key: ${{ format('CI-{0}-{1}', runner.os, hashFiles(fromJson(inputs.nix-cache-glob))) }}
+
         - uses: cachix/install-nix-action@v17
           with:
               nix_path: nixpkgs=channel:nixos-unstable # TODO: config option
@@ -19,9 +27,19 @@ runs:
               extra_nix_config: |
                   sandbox = false
 
+        - name: "Import Nix store cache"
+          shell: bash
+          if: "steps.nix-cache.outputs.cache-hit == 'true'"
+          run: "nix-store --import < /tmp/nixcache"
+
         - name: "Setup Nix Environment"
           shell: bash
           run: |
               nix-env --install --attr direnv nix-direnv -f '<nixpkgs>'
               direnv allow . && eval "$(direnv export bash)"
               echo "$PATH" >> $GITHUB_PATH
+
+        - name: "Export Nix store cache"
+          shell: bash
+          if: "steps.nix-cache.outputs.cache-hit != 'true'"
+          run: "nix-store --export $(find /nix/store -maxdepth 1 -name '*-*') > /tmp/nixcache"
