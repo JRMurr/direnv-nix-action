@@ -24,6 +24,8 @@ runs:
               path: /tmp/nixcache
               #   key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles(join(fromJson(inputs.nix-cache-glob), ','))) }}
               key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles('**/*.nix', '**/flake.lock')) }}
+              restore-keys: |
+                  ${{ format('{0}-{1}', runner.os, inputs.nix-cache-prefix) }}
 
         - uses: cachix/install-nix-action@v18
           with:
@@ -35,17 +37,25 @@ runs:
         - name: "Import Nix store cache"
           shell: bash
           if: "steps.nix-cache.outputs.cache-hit == 'true'"
-          run: "nix-store --import < /tmp/nixcache"
+          run: |
+              echo "::group::Nix store import"
+              nix-store --import < /tmp/nixcache
+              echo "::endgroup::"
 
         - name: "Setup Nix Environment"
           shell: bash
           run: |
+              echo "::group::Nix Environment setup"
               nix-env --install --attr direnv nix-direnv -f '<nixpkgs>'
               echo "source $HOME/.nix-profile/share/nix-direnv/direnvrc" >> $HOME/.direnvrc
               direnv allow . && eval "$(direnv export bash)"
               echo "$PATH" >> $GITHUB_PATH
+              echo "::endgroup::"
 
         - name: "Export Nix store cache"
           shell: bash
           if: "steps.nix-cache.outputs.cache-hit != 'true'"
-          run: "nix-store --export $(find /nix/store -maxdepth 1 -name '*-*') > /tmp/nixcache"
+          run: |
+              echo "::group::Nix store export"
+              nix-store --export $(find /nix/store -maxdepth 1 -name '*-*') > /tmp/nixcache
+              echo "::endgroup::"
