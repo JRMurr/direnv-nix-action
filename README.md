@@ -1,6 +1,6 @@
 # direnv-nix-action
 
-This action will install nix with the (cachix nix action)[https://github.com/cachix/install-nix-action] and direnv to make nix based workflows easier to setup.
+This action will install nix with the [cachix nix action](https://github.com/cachix/install-nix-action) and direnv to make nix based workflows easier to setup.
 
 ### Example workflow
 
