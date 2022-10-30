@@ -41,6 +41,7 @@ runs:
           shell: bash
           run: |
               nix-env --install --attr direnv nix-direnv -f '<nixpkgs>'
+              echo "source $HOME/.nix-profile/share/nix-direnv/direnvrc" >> $HOME/.direnvrc
               direnv allow . && eval "$(direnv export bash)"
               echo "$PATH" >> $GITHUB_PATH
 
