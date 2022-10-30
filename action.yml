@@ -14,13 +14,13 @@ runs:
     steps:
         # cache nix store https://github.com/cachix/install-nix-action/issues/56#issuecomment-1240991760
         - name: "Cache Nix store"
-          uses: actions/cache@v3.0.8
+          uses: actions/cache@v3.0.11
           id: nix-cache
           with:
               path: /tmp/nixcache
-              key: ${{ format('CI-{0}-{1}', runner.os, hashFiles(fromJson(inputs.nix-cache-glob))) }}
+              key: ${{ format('{0}-{1}', runner.os, hashFiles(join(fromJson(inputs.nix-cache-glob), ','))) }}
 
-        - uses: cachix/install-nix-action@v17
+        - uses: cachix/install-nix-action@v18
           with:
               nix_path: nixpkgs=channel:nixos-unstable # TODO: config option
               # TODO: make this a config option
