@@ -57,3 +57,41 @@ jobs:
       shell: bash
 ```
 
+You can disable Nix installation and configure it before running direnv. For example,
+if you use Cachix, you can do:
+
+
+```yaml
+name: use nix
+
+on: push
+env:
+    DEV_SHELL_NAME: CI
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # Docs to use Cachix: https://nix.dev/tutorials/continuous-integration-github-actions
+    - uses: cachix/install-nix-action@v17
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: cachix/cachix-action@v11
+      with:
+        name: mycache
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+    - name: "Setup env"
+      uses: JRMurr/direnv-nix-action@v2
+      with:
+        # You already installed nix, so you can disable that step
+        install-nix: "false"
+        # You are using Cachix cache, so no need to use Github cache too
+        cache-store: "false"
+
+    - name: use node
+      run: node --version
+      shell: bash
+```

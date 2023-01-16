@@ -5,6 +5,14 @@ inputs:
         description: "Prefix for nix store cache key"
         required: false
         default: "nix-store"
+    install-nix:
+        description: "Include nix installation; disable if you installed it before"
+        required: false
+        default: "true"
+    cache-store:
+        description: "Cache nix store"
+        required: false
+        default: "true"
     # nix-cache-files:
     #     description: "File name patterns (used in find) for files used in the nix derivation"
     #     required: false
@@ -19,6 +27,7 @@ runs:
         # cache nix store https://github.com/cachix/install-nix-action/issues/56#issuecomment-1240991760
         - name: "Cache Nix store"
           uses: actions/cache@v3.0.11
+          if: ${{ inputs.cache-nix-store == 'true' }}
           id: nix-cache
           with:
               path: /tmp/nixcache
@@ -28,6 +37,7 @@ runs:
                   ${{ format('{0}-{1}', runner.os, inputs.nix-cache-prefix) }}
 
         - uses: cachix/install-nix-action@v18
+          if: ${{ inputs.install-nix == 'true' }}
           with:
               nix_path: nixpkgs=channel:nixos-unstable # TODO: config option
               # TODO: make this a config option
@@ -36,7 +46,7 @@ runs:
 
         - name: "Import Nix store cache"
           shell: bash
-          if: "steps.nix-cache.outputs.cache-hit == 'true'"
+          if: ${{ inputs.cache-nix-store == 'true' && steps.nix-cache.outputs.cache-hit == 'true' }}
           run: |
               echo "::group::Nix store import"
               nix-store --import < /tmp/nixcache
@@ -54,7 +64,7 @@ runs:
 
         - name: "Export Nix store cache"
           shell: bash
-          if: "steps.nix-cache.outputs.cache-hit != 'true'"
+          if: ${{ inputs.cache-nix-store == 'true' && steps.nix-cache.outputs.cache-hit != 'true' }}
           run: |
               echo "::group::Nix store export"
               nix-store --export $(find /nix/store -maxdepth 1 -name '*-*') > /tmp/nixcache
