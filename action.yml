@@ -69,7 +69,7 @@ runs:
                   const fs = require('fs')
                   const direnvExport = JSON.parse(fs.readFileSync('/tmp/direnv.out'))
                   Object.keys(direnvExport).forEach(function (name) {
-                    const value = envs[name];
+                    const value = direnvExport[name];
                     if (name === 'PATH') {
                         core.addPath(value);
                     } else {
