@@ -58,9 +58,24 @@ runs:
               echo "::group::Nix Environment setup"
               nix-env --install --attr direnv nix-direnv -f '<nixpkgs>'
               echo "source $HOME/.nix-profile/share/nix-direnv/direnvrc" >> $HOME/.direnvrc
-              direnv allow . && eval "$(direnv export bash)"
-              echo "$PATH" >> $GITHUB_PATH
+              direnv allow . 
+              direnv exec / direnv export json > /tmp/direnv.out 
               echo "::endgroup::"
+
+        - name: "Export Env vars and Path"
+          uses: actions/github-script@v6
+          with:
+              script: |
+                  const fs = require('fs')
+                  const direnvExport = JSON.parse(fs.readFileSync('/tmp/direnv.out'))
+                  Object.keys(direnvExport).forEach(function (name) {
+                    const value = envs[name];
+                    if (name === 'PATH') {
+                        core.addPath(value);
+                    } else {
+                        core.exportVariable(name, value);
+                    }
+                  });
 
         - name: "Export Nix store cache"
           shell: bash
