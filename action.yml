@@ -73,14 +73,19 @@ runs:
                   core.info(JSON.stringify(direnvExport))
                   core.info(JSON.stringify(shouldExportEnvVars))
                   core.endGroup()
+
+                  core.startGroup('export  debug')
                   Object.keys(direnvExport).forEach(function (name) {
                     const value = direnvExport[name];
                     if (name === 'PATH') {
                         core.addPath(value);
                     } else if (shouldExportEnvVars) {
+                        core.info({name, value})
                         core.exportVariable(name, value);
                     }
                   });
+
+                  core.endGroup()
 
         - name: "Export Nix store cache"
           shell: bash
