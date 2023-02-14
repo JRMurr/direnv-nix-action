@@ -1,0 +1,15 @@
+name: "test loading action and exporting vars"
+on:
+    pull_request:
+env:
+    DEV_SHELL_NAME: CI
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - run: printenv
+            - uses: ./
+            # nix shell should have loaded and exported everything
+            - run: hello
+            - run: printenv | grep -q TEST_VAR=TEST
