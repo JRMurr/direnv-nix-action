@@ -13,14 +13,14 @@ inputs:
         description: "Cache nix store"
         required: false
         default: "true"
+    export-all-vars:
+        description: "Export all ENV vars direnv would touch, not just the PATH"
+        required: false
+        default: "true"
     # nix-cache-files:
     #     description: "File name patterns (used in find) for files used in the nix derivation"
     #     required: false
     #     default: '["*/*.nix", "*/flake.lock"]'
-# outputs:
-#     random-number:
-#         description: "Random number"
-#         value: ${{ steps.random-number-generator.outputs.random-number }}
 runs:
     using: "composite"
     steps:
@@ -68,11 +68,12 @@ runs:
               script: |
                   const fs = require('fs')
                   const direnvExport = JSON.parse(fs.readFileSync('/tmp/direnv.out'))
+                  const shouldExportEnvVars = core.getInput('export-all-vars', { required: false });
                   Object.keys(direnvExport).forEach(function (name) {
                     const value = direnvExport[name];
                     if (name === 'PATH') {
                         core.addPath(value);
-                    } else {
+                    } else if (shouldExportEnvVars) {
                         core.exportVariable(name, value);
                     }
                   });
