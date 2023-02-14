@@ -68,7 +68,7 @@ runs:
               script: |
                   const fs = require('fs')
                   const direnvExport = JSON.parse(fs.readFileSync('/tmp/direnv.out'))
-                  const shouldExportEnvVars = core.getBooleanInput('export-all-vars', { required: false });
+                  const shouldExportEnvVars = (core.getInput('export-all-vars', { required: false }) ?? 'true') === 'true';
                   core.startGroup('DirEnvOutput')
                   core.info(JSON.stringify(direnvExport))
                   core.endGroup()
