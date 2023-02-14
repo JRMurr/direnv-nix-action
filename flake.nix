@@ -9,7 +9,7 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShells = {
-          default = pkgs.mkShell { buildInputs = with pkgs; [ nixfmt ]; };
+          default = pkgs.mkShell { buildInputs = with pkgs; [ nixfmt act ]; };
           CI = pkgs.mkShell {
             buildInputs = with pkgs; [ hello ];
             shellHook = ''
