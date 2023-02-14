@@ -71,7 +71,7 @@ runs:
                   const shouldExportEnvVars = (core.getInput('export-all-vars', { required: false }) ?? 'true') === 'true';
                   core.startGroup('DirEnvOutput')
                   core.info(JSON.stringify(direnvExport))
-                  core.info('shouldExportEnvVars: ' + shouldExportEnvVars)
+                  core.info(JSON.stringify(shouldExportEnvVars))
                   core.endGroup()
                   Object.keys(direnvExport).forEach(function (name) {
                     const value = direnvExport[name];
