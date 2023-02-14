@@ -69,6 +69,9 @@ runs:
                   const fs = require('fs')
                   const direnvExport = JSON.parse(fs.readFileSync('/tmp/direnv.out'))
                   const shouldExportEnvVars = core.getBooleanInput('export-all-vars', { required: false });
+                  core.startGroup('DirEnvOutput')
+                  core.info(direnvExport)
+                  core.endGroup()
                   Object.keys(direnvExport).forEach(function (name) {
                     const value = direnvExport[name];
                     if (name === 'PATH') {
