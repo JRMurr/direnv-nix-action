@@ -17,10 +17,19 @@ inputs:
         description: "Export all ENV vars direnv would touch, not just the PATH"
         required: false
         default: "true"
-    # nix-cache-files:
-    #     description: "File name patterns (used in find) for files used in the nix derivation"
-    #     required: false
-    #     default: '["*/*.nix", "*/flake.lock"]'
+    nix_install_url:
+        description: "Installation URL that will contain a script to install Nix."
+        required: false
+        default: "https://nixos.org/nix/install"
+    nix_path:
+        description: "If installing nix, Set NIX_PATH environment variable."
+        required: false
+        default: "nixpkgs=channel:nixos-unstable"
+    extra_nix_config:
+        description: "If installing nix, Set NIX_PATH environment variable."
+        required: false
+        default: |
+            sandbox = false
 runs:
     using: "composite"
     steps:
@@ -31,18 +40,16 @@ runs:
           id: nix-cache
           with:
               path: /tmp/nixcache
-              #   key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles(join(fromJson(inputs.nix-cache-glob), ','))) }}
               key: ${{ format('{0}-{1}-{2}', runner.os, inputs.nix-cache-prefix, hashFiles('**/*.nix', '**/flake.lock')) }}
               restore-keys: |
                   ${{ format('{0}-{1}', runner.os, inputs.nix-cache-prefix) }}
 
-        - uses: cachix/install-nix-action@v18
+        - uses: cachix/install-nix-action@v20
           if: ${{ inputs.install-nix == 'true' }}
           with:
-              nix_path: nixpkgs=channel:nixos-unstable # TODO: config option
-              # TODO: make this a config option
-              extra_nix_config: |
-                  sandbox = false
+              nix_path: ${{ inputs.nix_path }}
+              install_url: ${{ inputs.nix_install_url }}
+              extra_nix_config: ${{ inputs.extra_nix_config }}
 
         - name: "Import Nix store cache"
           shell: bash
