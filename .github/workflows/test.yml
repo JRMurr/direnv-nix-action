@@ -11,5 +11,6 @@ jobs:
             - run: printenv
             - uses: ./
             # nix shell should have loaded and exported everything
+            - run: nix-env --query # make sure nix install is still happy
             - run: hello
             - run: printenv | grep -q TEST_VAR=TEST
