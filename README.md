@@ -50,7 +50,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: "Setup env"
-      uses: JRMurr/direnv-nix-action@v2
+      uses: JRMurr/direnv-nix-action@v4.1.0
 
     - name: use node
       run: node --version
@@ -84,7 +84,7 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
     - name: "Setup env"
-      uses: JRMurr/direnv-nix-action@v2
+      uses: JRMurr/direnv-nix-action@v4.1.0
       with:
         # You already installed nix, so you can disable that step
         install-nix: "false"
