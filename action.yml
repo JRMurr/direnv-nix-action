@@ -35,7 +35,7 @@ runs:
     steps:
         # cache nix store https://github.com/cachix/install-nix-action/issues/56#issuecomment-1240991760
         - name: "Cache Nix store"
-          uses: actions/cache@v3.0.11
+          uses: actions/cache@v4
           if: ${{ inputs.cache-store == 'true' }}
           id: nix-cache
           with:
